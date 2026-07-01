@@ -7,6 +7,9 @@ on:
 concurrency:
   group: ${{ github.ref }}
 
+permissions:
+  contents: write
+
 jobs:
 
   windows:
@@ -46,17 +49,17 @@ jobs:
       - name: Yarn Install
         run: yarn
 
-      - name: Import Certs
-        env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-        run: |
-          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
-          security create-keychain -p $MACOS_CERTIFICATE_PWD build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p $MACOS_CERTIFICATE_PWD build.keychain
-          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_CERTIFICATE_PWD build.keychain
+      # - name: Import Certs
+      #   env:
+      #     MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+      #     MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+      #   run: |
+      #     echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+      #     security create-keychain -p $MACOS_CERTIFICATE_PWD build.keychain
+      #     security default-keychain -s build.keychain
+      #     security unlock-keychain -p $MACOS_CERTIFICATE_PWD build.keychain
+      #     security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+      #     security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_CERTIFICATE_PWD build.keychain
 
       - name: Synchronize Versions File
         run: node ./scripts/syncVersions.js
@@ -89,11 +92,11 @@ jobs:
           SYNC_OS_KEYS: linux
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check for Npm publish
-        run: node ./scripts/npmPublish.js
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          scope: '@ulixee'
+      # - name: Check for Npm publish
+      #   run: node ./scripts/npmPublish.js
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #     scope: '@ulixee'
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
